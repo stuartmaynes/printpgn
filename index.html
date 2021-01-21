@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Print PGN</title>
+    <script src="https://unpkg.com/vue@next"></script>
+    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+    <link href="./print.css" type="text/css" rel="stylesheet" media="print" >
+</head>
+<body>
+    <div id="game" class="flex min-h-screen">
+        <div id="input" class="flex-none bg-gray-900 p-12 min-h-screen w-3/12 noprint">
+            <h1 class="font-black text-white text-3xl leading-none mb-4">Print PGN</h1>
+            <p class="mb-4 text-white">Past your PGN into the box and print.</p>
+            <textarea
+                id="Print PGN"
+                v-model="pgn"
+                placeholder="Paste your PGN here."
+                class="p-4 w-full noprint h-56 rounded"
+            >
+            </textarea>
+        </div>
+    </div>
+    <script src="./app.js"></script>
+</body>
+</html>
