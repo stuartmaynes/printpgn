@@ -7,79 +7,118 @@ Vue.createApp({
     },
     watch: {
         pgn(input) {
-            this.processGame(input);
+            this.processInput(input)
         },
     },
     methods: {
-        processGame(input)
+        /**
+         * PGN files may contain move than one game
+         * A game may contain variations
+         * A game may contain comments
+         * The move notation may either be one continuous string or
+         * broken by new lines (\n)
+        */
+        processInput(input)
         {
-            let lines = input.split(/\n/);
+            this.games = [];
 
-            let game = this.newGame();
+            const nonMetaLinesSplitByOneNewLinePattern = /([^\]\n])\n([^\n])/gm
+            const threeOrMoveNewlinesPattern = /\n{3,}/gm
+            const endBracketTwoNewlinesPattern = /\]\n\n/gm
+            const metaDataPattern = /^\[(\S*)\s"(.*)"\]$/
+            const moveNumPattern  = /\d+\./
+            const turnPattern = /(?<white>\S+\+*#*)\s(?:{(?<whiteComment>.+)})?\s?(?<black>\S+\+*#*)?\s?(?:{(?<blackComment>.+)})?/
+            const openBracketPattern  = /^\(.+/
+            const closeBracketPattern  = /^.+\)$/
+            const blackToMovePattern  = /^\d+\.{3}$/
 
-            lines.forEach(line => {
+           let game = this.newGame()
 
-                // Does the line contain meta data
-                if (line.match(/^\[.*\]$/)) {
-                    let matches = line.match(/^\[(\S*)\s"(.*)"\]$/);
+           /**
+            * Clean the input into a consistent format and iterate through the
+            * lines in order to create games from the input.
+            *
+            * Format
+            * [key value] (meta data in square brackets)
+            * 1... (moves, variations and commets as a single string)
+            * \n (single empy line after moves)
+            */
 
-                    if (matches) {
-                        game.meta[matches[1]] = matches[2];
-                    }
-                }
-                // Does the line contain the moves
-                else if (line.match(/^\d+\..*$/)) {
+            // Ensure a newline is at the end of the string
+            input = `${input.trim()}\n`
 
-                    let variationStart = 0;
-                    let variationEnd = 0;
-                    let variation = '';
+            input
+                .replace(nonMetaLinesSplitByOneNewLinePattern, `$1 $2`)
+                .replace(threeOrMoveNewlinesPattern, '\n\n')
+                .replace(endBracketTwoNewlinesPattern, ']\n')
+                .split(/\n/)
+                .forEach(line => {
+                    if (metaDataPattern.test(line)) {
+                        let matches = line.match(metaDataPattern)
+                        game.meta[matches[1]] = matches[2]
 
-                    [...line].forEach((char) => {
-                        if (char === '(') {
-                            variationStart++;
-                        }
+                    } else if (moveNumPattern.test(line)) {
 
-                        if (variationStart > 0) {
-                            variation += char;
-                        }
+                        let mainLine = ''
+                        let variation = ''
+                        let brackets = 0
 
-                        if (char === ')') {
-                            variationEnd++;
+                        line.split(/\s/).forEach((str) => {
 
-                            if (variationStart === variationEnd) {
-                                game.variations.push(variation);
+                            if (!str.trim()) { return }
 
-                                variationStart = 0;
-                                variationEnd = 0;
-                                variation = '';
+                            if (openBracketPattern.test(str)) {
+                                brackets++
+                                variation += `${str} `
                             }
+
+                            else if (closeBracketPattern.test(str)) {
+                                brackets--
+                                variation += `${str} `
+
+                                if (brackets === 0) {
+                                    game.variations.push(variation.trim())
+                                    variation = ''
+                                }
+                            }
+
+                            else if (brackets) {
+                                variation += `${str} `
+
+                            }
+
+                            else if (!blackToMovePattern.test(str)) {
+                                mainLine += `${str} `
+                            }
+
+                        })
+
+                        mainLine.trim().split(moveNumPattern).forEach((move) => {
+                            if (move.trim()) {
+                                matches = move.trim().match(turnPattern)
+
+                                for (key in matches.groups) {
+                                    if (typeof matches.groups[key] === 'undefined') {
+                                        matches.groups[key] = ''
+                                    } else {
+                                        matches.groups[key] = matches.groups[key].trim()
+                                    }
+                                }
+
+                                game.moves.push(matches.groups)
+                            }
+                        })
+
+
+                    } else {
+
+                        if (game.moves.length) {
+                            this.games.push(game)
                         }
 
-                    });
-
-                    game.variations.forEach((v) => {
-                        line = line.replace(v, '');
-                    });
-
-                    game.moves = line.replace(/\d+\.\.\./g, '')
-                        .replace(/\s{2}/g, '')
-                        .split(/\d+\.\s/)
-                        .filter((move) => {
-                            return /^\S/.test(move)
-                        })
-                        .map((move) => {
-                            let m = move.split(/\s+/)
-                            return { white: m[0], black: m[1] }
-                        })
-
-                    this.games.push(game);
-
-                    console.log(game);
-
-                    game = this.newGame();
-                }
-
-            });
+                        game = this.newGame()
+                    }
+                })
         },
 
         newGame() {
@@ -87,8 +126,8 @@ Vue.createApp({
                 meta: {},
                 moves: [],
                 variations: [],
-            };
-        }
+            }
+        },
     },
     mounted() {
     }

@@ -1,3 +1,11 @@
-.noprint {
-    display: none;
+@media print {
+
+    .print\:hidden {
+        display: none;
+    }
+
+    .print\:w-full {
+        width: 100% !important;
+    }
+
 }
