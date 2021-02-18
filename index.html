@@ -1,48 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Print PGN</title>
-    <script src="https://unpkg.com/vue@next"></script>
-    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
-    <link href="./print.css" type="text/css" rel="stylesheet" media="print" >
-</head>
-<body>
-    <div id="game" class="flex min-h-screen print:w-full">
-        <div id="input" class="flex-none bg-gray-900 p-12 min-h-screen w-3/12 print:hidden">
-            <h1 class="font-black text-white text-3xl leading-none mb-4">Print PGN</h1>
-            <p class="mb-4 text-white">Paste your PGN into the box and print.</p>
-            <textarea
-                id="Print PGN"
-                v-model="pgn"
-                placeholder="Paste your PGN here."
-                class="p-4 w-full h-96 rounded"
-            >
-            </textarea>
-        </div>
-
-        <div class="min-h-screen p-12 w-9/12 print:w-full">
-            <ol class="flex print:hidden">
-                <li v-for="(game, i) in games">
-                    <a class="p-2 mr-2 rounded bg-gray-900 hover:bg-gray-700 text-sm text-white" :href="`#game${i + 1}`">Game {{ i + 1 }}</a>
-                </li>
-            </ol>
-
-            <div :id="`game${i + 1}`" v-for="(game, i) in games" :v-if="i === 0">
-                <h2 class="font-bold mb-2 mt-6">Game {{ i + 1 }}</h2>
-                <table class="w-full border border-collapse print:w-full">
-                    <tr v-for="(move, i) in game.moves" class="hover:bg-green-100">
-                        <th class="w-1/12 border p-3">{{ i + 1 }}.</th>
-                        <td class="w-1/12 border p-3">{{ move.white }}</td>
-                        <td class="w-1/12 border p-3">{{ move.black }}</td>
-                        <td class="border p-3">{{ move.whiteComment }} {{ move.blackComment }}</td>
-                    </tr>
-                </table>
-            </div>
-        </div>
-
-    </div>
-    <script src="./app.js"></script>
-</body>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
 </html>
