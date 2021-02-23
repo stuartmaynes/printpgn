@@ -1,96 +1,194 @@
 <template>
+<div class="flex flex-col h-screen">
+  <header class="p-2 bg-cyan-50 text-cyan-900 text-xs md:text-sm text-center print:hidden">
+    This app is currently in beta testing. If you have
+    <a href="/faqs/#errors" class="underline">experienced an error please
+    let me know</a>.
+  </header>
 
-  <div class="flex flex-col min-h-screen w-full">
-    <header class="w-full">
-      <p class="bg-blue-100 p-2 font-bold text-center text-sm text-blue-900 print:hidden">
-        This app is currently in beta testing. If you have experienced an error please let me know.
-      </p>
-    </header>
+  <main class="flex flex-col md:flex-row flex-grow">
 
-    <section class="flex flex-grow flex-col md:flex-row">
+      <aside class="flex flex-grow flex-col 3xl:flex-row md:w-6/12 lg:w-4/12 text-sm print:hidden">
+          <div class="3xl:w-7/12 p-3 lg:p-5 bg-blue-gray-700 text-white">
+              <logo />
 
-      <aside class="flex flex-grow flex-col 3xl:flex-row md:w-4/12 lg:w-3/12 3xl:w-4/12 print:hidden">
-        <sidebar @processed="notation" id="sidebar" class="flex-grow p-4 lg:p-6 bg-gray-800"/>
-        <options :games="games" :print="print" class="flex-grow p-4 lg:p-6 bg-gray-100"/>
+              <div class="mb-4 pb-3 border-b border-blue-gray-600">
+                  <p class="mb-4">Paste your PGN into the box below. It will be formatted and ready to be printed. Use the display options to fine tune what is printed.</p>
+                  <textarea class="p-2 w-full rounded text-gray-900" v-model="PGN"></textarea>
+                  <button class="mb-3" @click="setPGN(0)">clear</button>
+              </div>
+
+              <div>
+                  <h3 class="mb-1 text-lg font-bold">Example PGNs</h3>
+                  <ul class="list-disc list-inside">
+                      <li class="mb-1">
+                          <button @click="setPGN(1)">Single game with comments</button>
+                      </li>
+                      <li class="mb-1">
+                          <button @click="setPGN(2)">Multiple games without comments</button>
+                      </li>
+                  </ul>
+              </div>
+          </div>
+
+          <div class="flex-grow 3xl:w-5/12 p-3 lg:p-5 bg-gray-100" v-if="games.length">
+              <h3 class="mb-1 text-lg font-bold">Layout</h3>
+
+              <div class="flex mb-6">
+                <button class="p-3 w-1/2 text-center border bg-white rounded-l-md" @click="columnise(1)" :class="{ 'bg-cyan-500 text-white' : options.layout == 1 }">
+                  <i class="fas fa-align-justify"></i>
+                </button>
+
+                <button class="p-3 w-1/2 text-center border-t border-r border-b bg-white rounded-r-md" @click="columnise(2)" :class="{ 'bg-cyan-500 text-white' : options.layout == 2 }">
+                  <i class="fas fa-align-justify mr-1"></i><i class="fas fa-align-justify"></i>
+                </button>
+              </div>
+
+              <h3 class="mb-1 text-lg font-bold">Include</h3>
+              <ol class="mb-6">
+                  <li class="mb-1">
+                    <label class="cursor-pointer select-none">
+                        <input type="checkbox" v-model="options.comments.column">
+                        Comments column
+                    </label>
+                  </li>
+                  <li class="mb-1">
+                    <label class="cursor-pointer select-none">
+                        <input type="checkbox" v-model="options.comments.text">
+                        Comments text
+                    </label>
+                  </li>
+                  <li class="mb-1">
+                    <label class="cursor-pointer select-none">
+                        <input type="checkbox" v-model="options.meta">
+                        Meta
+                    </label>
+                  </li>
+                  <li class="mb-1">
+                    <label class="cursor-pointer select-none">
+                        <input type="checkbox" v-model="options.title">
+                        Title
+                    </label>
+                  </li>
+              </ol>
+
+              <h3 class="mb-1 text-lg font-bold">Games</h3>
+              <ol class="mb-6">
+                <li class="mb-1" v-for="game in games" v-bind:key="game">
+                    <label class="cursor-pointer select-none">
+                        <input type="checkbox" v-model="game.print">
+                        {{ game.meta.Event }}
+                    </label>
+                </li>
+              </ol>
+          </div>
       </aside>
 
-      <main class="flex-grow md:w-8/12 lg:w-9/12 3xl:w-8/12 p-4 lg:p-6 bg-white print:p-3">
-        <h2 class="hidden print:block font-black text-gray-200 text-2xl leading-none mb-4">Print PGN</h2>
-        <move-list :games="games" :print="print" class="w-full text-sm"/>
-      </main>
+      <section class="flex flex-col flex-grow md:w-6/12 lg:w-8/12 bg-white overflow-hidden">
+          <div class="p-3 lg:p-5" v-if="games.length">
+            <div class="text-xs text-gray-600 border-b pt-2 pb-4 mb-4 print:hidden" :class="{ 'lg:hidden' : options.layout == 1, 'xl:hidden': options.layout == 2 }">
+                <p>Scroll left-to-right to see the contents of the table. When printed the table will fit the width of the paper.</p>
+            </div>
 
-    </section>
-  </div>
-
+            <game v-for="(game, i) in games" v-bind:key="game.id" :game="game" :options="options" :pageBreak="(i + 1) !== games.length" />
+          </div>
+      </section>
+  </main>
+</div>
 </template>
 
 <script>
-import Sidebar from './components/Sidebar.vue'
-import Options from './components/Options.vue'
-import MoveList from './components/MoveList.vue'
+import Game from './components/Game.vue'
+import Logo from './components/Logo.vue'
+import { PGN } from './pgn/PGN.js'
 
 export default {
-    components: {
-      Sidebar,
-      Options,
-      MoveList,
-    },
+  components: {
+    Game,
+    Logo,
+  },
+  methods: {
 
-    data() {
-        return {
-          games: [],
-          print: {
-            columns: 1,
-            comments: {
-              columns: true,
-              values: true,
-            },
-            variations: true,
-          },
-        }
-    },
+    columnise(totalColumns) {
+      this.options.layout = totalColumns
 
-    methods: {
+      this.games.forEach((game) => {
+        let totalRows = Math.ceil(game.moves.length / totalColumns)
 
-      chunk(arr, size) {
-        return Array.from({ length: Math.ceil(arr.length / size) }, (v, i) =>
-          arr.slice(i * size, i * size + size)
+        let moves = Array.from({ length: totalRows * totalColumns }, (v, i) => {
+          return game.moves[i] || { number: i + 1 };
+        });
+
+        let columns = Array.from({ length: Math.ceil(moves.length / totalRows) }, (v, i) =>
+          moves.slice(i * totalRows, i * totalRows + totalRows)
         );
-      },
 
-      columnise(totalColumns) {
-        this.games.forEach((game) => {
-          let totalRows = Math.ceil(game.moves.length / totalColumns)
-
-          let moves = Array.from({ length: totalRows * totalColumns }, (v, i) => {
-            return game.moves[i] || { number: i + 1 };
+        game.rows = Array.from({ length: totalRows }, (_, i) => {
+          return Array.from({ length: totalColumns }, (_, n) => {
+              return columns[n][i]
           });
+        });
 
-          let columns = this.chunk(moves, totalRows)
-
-          game.rows = Array.from({ length: totalRows }, (_, i) => {
-            return Array.from({ length: totalColumns }, (_, n) => {
-                return columns[n][i]
-            });
-          });
-
-          game.print = true
-        })
-      },
-
-      notation(data) {
-        this.games = data
-        this.columnise(this.print.columns)
-      },
-
+        game.print = true
+      })
     },
 
-    watch: {
-      'print.columns': function(n) {
-        this.columnise(n)
-      }
+    setPGN(i) {
+      if (i == 0) this.PGN = ''
+      if (i == 1) this.PGN = PGN.example(0)
+      if (i == 2) this.PGN = PGN.example(1)
+    },
+  },
+
+  watch: {
+    /**
+     * PGN files may contain move than one game
+     * A game may contain variations
+     * A game may contain comments
+     * The move notation may either be one continuous string or
+     * broken by new lines (\n)
+    */
+    PGN(input) {
+      this.games = PGN.parser(input)
+      this.columnise(1)
     }
+  },
+
+  data() {
+    return {
+      PGN: '',
+      games: [],
+      options: {
+        layout: 1,
+        meta: true,
+        title: true,
+        comments: {
+          column: true,
+          text: true,
+        },
+      },
+    }
+  }
 }
 </script>
 
-<style></style>
+<style scoped>
+  textarea {
+      height: 80px;
+  }
+  @media screen and (min-height: 400px) {
+      textarea {
+          height: 160px;
+      }
+  }
+  @media screen and (min-height: 600px) {
+      textarea {
+          height: 260px;
+      }
+  }
+  @media screen and (min-height: 800px) {
+      textarea {
+          height: 360px;
+      }
+  }
+</style>
