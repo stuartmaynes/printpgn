@@ -9,25 +9,27 @@
   <main class="flex flex-col md:flex-row flex-grow">
 
       <aside class="flex flex-grow flex-col 3xl:flex-row md:w-6/12 lg:w-4/12 text-sm print:hidden">
-          <div class="3xl:w-7/12 p-3 lg:p-5 bg-blue-gray-700 text-white">
-              <logo />
+          <div class="3xl:w-7/12 p-3 lg:p-5 bg-gray-800 text-white relative overflow-hidden" :class="{ 'flex-grow': games.length == 0 }">
+              <div class="relative z-10">
+                <logo />
 
-              <div class="mb-4 pb-3 border-b border-blue-gray-600">
-                  <p class="mb-4">Paste your PGN into the box below. It will be formatted and ready to be printed. Use the display options to fine tune what is printed.</p>
-                  <textarea class="p-2 w-full rounded text-gray-900" v-model="PGN"></textarea>
-                  <button class="mb-3" @click="setPGN(0)">clear</button>
-              </div>
+                <div class="mb-4 pb-3 border-b border-blue-gray-600">
+                    <p class="mb-4">Paste your PGN into the box below. It will be formatted and ready to be printed. Use the display options to fine tune what is printed.</p>
+                    <textarea class="p-2 w-full rounded text-gray-900" v-model="PGN"></textarea>
+                    <button class="mb-3" @click="setPGN(0)">clear</button>
+                </div>
 
-              <div>
-                  <h3 class="mb-1 text-lg font-bold">Example PGNs</h3>
-                  <ul class="list-disc list-inside">
-                      <li class="mb-1">
-                          <button @click="setPGN(1)">Single game with comments</button>
-                      </li>
-                      <li class="mb-1">
-                          <button @click="setPGN(2)">Multiple games without comments</button>
-                      </li>
-                  </ul>
+                <div>
+                    <h3 class="mb-1 text-lg font-bold">Example PGNs</h3>
+                    <ul class="list-disc list-inside">
+                        <li class="mb-2">
+                            <button @click="setPGN(1)">Single game with comments</button>
+                        </li>
+                        <li class="mb-2">
+                            <button @click="setPGN(2)">Multiple games without comments</button>
+                        </li>
+                    </ul>
+                </div>
               </div>
           </div>
 
@@ -46,46 +48,46 @@
 
               <h3 class="mb-1 text-lg font-bold">Include</h3>
               <ol class="mb-6">
-                  <li class="mb-1">
-                    <label class="cursor-pointer select-none">
-                        <input type="checkbox" v-model="options.comments.column">
-                        Comments column
+                  <li class="mb-2">
+                    <label class="flex cursor-pointer select-none align-top">
+                      <input type="checkbox" v-model="options.title" class="mr-1 mt-1">
+                      <span class="leading-snug">Game title</span>
                     </label>
                   </li>
-                  <li class="mb-1">
-                    <label class="cursor-pointer select-none">
-                        <input type="checkbox" v-model="options.comments.text">
-                        Comments text
+                  <li class="mb-2">
+                    <label class="flex cursor-pointer select-none align-top">
+                      <input type="checkbox" v-model="options.meta" class="mr-1 mt-1">
+                      <span class="leading-snug">Game meta</span>
                     </label>
                   </li>
-                  <li class="mb-1">
-                    <label class="cursor-pointer select-none">
-                        <input type="checkbox" v-model="options.meta">
-                        Meta
+                  <li class="mb-2">
+                    <label class="flex cursor-pointer select-none align-top">
+                        <input type="checkbox" v-model="options.comments.column" class="mr-1 mt-1">
+                        <span class="leading-snug">Comments column</span>
                     </label>
                   </li>
-                  <li class="mb-1">
-                    <label class="cursor-pointer select-none">
-                        <input type="checkbox" v-model="options.title">
-                        Title
+                  <li class="mb-2">
+                    <label class="flex cursor-pointer select-none align-top">
+                      <input type="checkbox" v-model="options.comments.text" class="mr-1 mt-1">
+                      <span class="leading-snug">Comments text</span>
                     </label>
                   </li>
               </ol>
 
               <h3 class="mb-1 text-lg font-bold">Games</h3>
               <ol class="mb-6">
-                <li class="mb-1" v-for="game in games" v-bind:key="game">
-                    <label class="cursor-pointer select-none">
-                        <input type="checkbox" v-model="game.print">
-                        {{ game.meta.Event }}
+                <li class="mb-2" v-for="game in games" v-bind:key="game">
+                    <label class="flex cursor-pointer select-none align-top">
+                        <input type="checkbox" v-model="game.print" class="mr-1 mt-1">
+                        <span class="leading-snug">{{ game.meta.Event }}</span>
                     </label>
                 </li>
               </ol>
           </div>
       </aside>
 
-      <section class="flex flex-col flex-grow md:w-6/12 lg:w-8/12 bg-white overflow-hidden">
-          <div class="p-3 lg:p-5" v-if="games.length">
+      <section id="games" class="md:flex flex-col flex-grow md:w-6/12 lg:w-8/12 bg-white relative" :class="{ 'hidden' : games.length == 0 }">
+          <div class="p-3 lg:p-5 bg-white relative z-10" v-if="games.length">
             <div class="text-xs text-gray-600 border-b pt-2 pb-4 mb-4 print:hidden" :class="{ 'lg:hidden' : options.layout == 1, 'xl:hidden': options.layout == 2 }">
                 <p>Scroll left-to-right to see the contents of the table. When printed the table will fit the width of the paper.</p>
             </div>
@@ -190,5 +192,20 @@ export default {
       textarea {
           height: 360px;
       }
+  }
+
+  #games::before {
+    content: 'PrintPGN';
+    display: block;
+    font-size: 60px;
+    font-weight: 900;
+    left: 50%;
+    margin-left: -150px;
+    margin-top: -50px;
+    opacity: 0.10;
+    position: absolute;
+    text-align: center;
+    top: 50%;
+    width: 300px;
   }
 </style>

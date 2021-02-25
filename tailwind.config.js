@@ -12,6 +12,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        'primary': '#082B65',
         'blue-gray': colors.blueGray,
         'warm-gray': colors.warmGray,
         'cyan': colors.cyan,
