@@ -1,9 +1,30 @@
+const colors = require('tailwindcss/colors')
+
 module.exports = {
-  purge: ['./index.html'],
+  important: '#printpgn',
+  purge: [
+    './index.html',
+    './faqs/index.html',
+    './src/App.vue',
+    './src/components/*.vue',
+  ],
   darkMode: false, // or 'media' or 'class'
   theme: {
     extend: {
+      colors: {
+        'primary': '#082B65',
+        'blue-gray': colors.blueGray,
+        'warm-gray': colors.warmGray,
+        'cyan': colors.cyan,
+        'teal': colors.teal,
+        'violet': colors.violet,
+      },
+      fontSize: {
+        '2xs': '.55rem',
+      },
       screens: {
+        '3xl': '1600px',
+        '4xl': '1800px',
         '3xl': '1600px',
         'print': {'raw': 'print'},
       },
@@ -21,5 +42,7 @@ module.exports = {
     extend: {
     },
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/typography'),
+  ],
 }
