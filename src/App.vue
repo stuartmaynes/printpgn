@@ -14,21 +14,26 @@
                 <logo />
 
                 <div class="mb-4 pb-3 border-b border-blue-gray-600">
-                    <p class="mb-4">Paste your PGN into the box below. It will be formatted and ready to be printed. Use the display options to fine tune what is printed.</p>
+                    <p class="mb-4">Paste your PGN into the box below. It will be formatted and ready to be printed. Use the display options to fine tune what is printed. <a class="underline py-4 text-cyan-400" href="/faqs/">Checkout the about page for more details.</a></p>
                     <textarea class="p-2 w-full rounded text-gray-900" v-model="PGN"></textarea>
                     <button class="mb-3" @click="setPGN(0)">clear</button>
                 </div>
 
                 <div>
-                    <h3 class="mb-1 text-lg font-bold">Example PGNs</h3>
-                    <ul class="list-disc list-inside">
-                        <li class="mb-2">
-                            <button @click="setPGN(1)">Single game with comments</button>
-                        </li>
-                        <li class="mb-2">
-                            <button @click="setPGN(2)">Multiple games without comments</button>
-                        </li>
-                    </ul>
+                    <h3 class="text-lg font-bold text-cyan-400">Example PGNs</h3>
+                    <p class="mb-4">Use these examples to try the app.</p>
+                    <div>
+                      <a class="mb-3 p-3 cursor-pointer border border-blue-gray-700 hover:bg-blue-gray-700 block" @click="setPGN(1)">
+                        <div class="font-bold lg:text-lg leading-tight">The Opera House Game</div>
+                        <div class="text-blue-gray-400">Single game with comments</div>
+                      </a>
+                    </div>
+                    <div>
+                      <a class="mb-3 p-3 cursor-pointer border border-blue-gray-700 hover:bg-blue-gray-700 block" @click="setPGN(2)">
+                        <div class="font-bold lg:text-lg leading-tight">Spassky - Fischer World Championship 1972</div>
+                        <div class="text-blue-gray-400">Multiple games without comments</div>
+                      </a>
+                    </div>
                 </div>
               </div>
           </div>
@@ -83,6 +88,10 @@
                     </label>
                 </li>
               </ol>
+
+                <button class="p-3 w-full text-center border bg-white rounded-md" onclick="javascript:window.print()">
+                  <i class="fas fa-print"></i> Print
+                </button>
           </div>
       </aside>
 
@@ -91,8 +100,9 @@
             <div class="text-xs text-gray-600 border-b pt-2 pb-4 mb-4 print:hidden" :class="{ 'lg:hidden' : options.layout == 1, 'xl:hidden': options.layout == 2 }">
                 <p>Scroll left-to-right to see the contents of the table. When printed the table will fit the width of the paper.</p>
             </div>
-
-            <game v-for="(game, i) in games" v-bind:key="game.id" :game="game" :options="options" :pageBreak="(i + 1) !== games.length" />
+            <div>
+              <game v-for="(game, i) in games" v-bind:key="game.id" :game="game" :options="options" :pageBreak="(i + 1) !== games.length" />
+            </div>
           </div>
       </section>
   </main>
@@ -194,18 +204,20 @@ export default {
       }
   }
 
-  #games::before {
-    content: 'PrintPGN';
-    display: block;
-    font-size: 60px;
-    font-weight: 900;
-    left: 50%;
-    margin-left: -150px;
-    margin-top: -50px;
-    opacity: 0.10;
-    position: absolute;
-    text-align: center;
-    top: 50%;
-    width: 300px;
+  @media screen {
+    #games::before {
+      content: 'PrintPGN';
+      display: block;
+      font-size: 60px;
+      font-weight: 900;
+      left: 50%;
+      margin-left: -150px;
+      margin-top: -50px;
+      opacity: 0.10;
+      position: absolute;
+      text-align: center;
+      top: 50%;
+      width: 300px;
+    }
   }
 </style>
